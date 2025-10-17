@@ -1,0 +1,70 @@
+*{
+   margin: 0;
+   padding: 0;
+   box-sizing: border-box;
+}
+
+.concluida {
+   text-decoration: line-through; 
+   color: gray;
+}
+
+.main {
+   max-width: 600px;
+   margin: 20px auto;
+   border-radius: 10px;
+   box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.422);
+   padding: 10px;
+}
+
+.main__title {
+   text-align: center;
+}
+
+.login-form {
+   display: flex;
+   width: 100%;
+   justify-content: center;
+   margin: 20px;
+}
+
+.login-form__button {
+   width: 80px;
+}
+
+.form-de-tarefas {
+   display: flex;
+   justify-content: center;
+   margin: 5px;
+}
+
+.filtro-de-tarefas {
+   display: flex;
+   justify-content: center;
+   margin-bottom: 10px;
+}
+
+.lista-de-tarefas {
+   display: flex;
+   flex-direction: column;
+   width: 100%;
+   align-items: center;
+   list-style: none;
+}
+
+.lista-de-tarefas__loading {
+   text-align: center;
+}
+
+.lista-de-tarefas__card {
+   display: flex;
+   box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.368);
+   border-radius: 5px;
+   width: 50%;
+   padding: 10px;
+   justify-content: space-evenly;
+   margin: 5px;
+}
+
+
+
