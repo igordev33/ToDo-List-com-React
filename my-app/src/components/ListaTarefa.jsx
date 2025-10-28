@@ -1,18 +1,19 @@
 import { useEffect, memo, useState, useCallback, useRef, useContext } from "react";
 import useInput from "../hooks/useInput";
 import Tarefa from "./Tarefa";
-import { UserContext } from "../contexts/UserContext";
+import { userState } from "../state/UserState"
+import { useRecoilValue } from "recoil";
 
 function ListaTarefa() {
 
-    const URL_API = 'https://crudcrud.com/api/a41f6d4ab7f74530a1efe979b2cddb6b'
+    const URL_API = 'https://crudcrud.com/api/1d830d25dd1e4d75838fd93b028fefb7'
 
-    const [carregando, setCarregando] = useState(true)
-    const [filtro, setFiltro] = useState('todos')
-    const inputTarefa = useInput()
-    const [listaTarefa, setListaTarefa] = useState([])
-    const estaProcessando = useRef(false)
-    const {usuario} = useContext(UserContext)
+    const [carregando, setCarregando] = useState(true);
+    const [filtro, setFiltro] = useState('todos');
+    const inputTarefa = useInput();
+    const [listaTarefa, setListaTarefa] = useState([]);
+    const estaProcessando = useRef(false);
+    const usuario = useRecoilValue(userState);
 
     //Busca dados da API ao montar o elemento
     useEffect(() => {
