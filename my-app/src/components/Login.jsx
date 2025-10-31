@@ -1,6 +1,6 @@
 import { memo } from "react";
 import useInput from "../hooks/useInput"
-import { userState } from "../state/UserState.js"
+import { userState } from "../state/States.js"
 import { useSetRecoilState } from "recoil";
 
 

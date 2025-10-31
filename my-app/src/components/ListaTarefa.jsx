@@ -1,29 +1,30 @@
-import { useEffect, memo, useState, useCallback, useRef, useContext } from "react";
+import { useEffect, memo, useState, useCallback, useRef } from "react";
 import useInput from "../hooks/useInput";
 import Tarefa from "./Tarefa";
-import { userState } from "../state/UserState"
-import { useRecoilValue } from "recoil";
+import { filtroState, filtroTarefas, listaTarefasState, userState } from "../state/States"
+import { useRecoilState, useRecoilValue } from "recoil";
 
 function ListaTarefa() {
 
-    const URL_API = 'https://crudcrud.com/api/1d830d25dd1e4d75838fd93b028fefb7'
+    const URL_API = 'https://crudcrud.com/api/e487186cbee247c09c9c539294cdf48b'
 
     const [carregando, setCarregando] = useState(true);
-    const [filtro, setFiltro] = useState('todos');
+    const [filtro, setFiltro] = useRecoilState(filtroState);
     const inputTarefa = useInput();
-    const [listaTarefa, setListaTarefa] = useState([]);
+    const [listaTarefa, setListaTarefa] = useRecoilState(listaTarefasState);
     const estaProcessando = useRef(false);
     const usuario = useRecoilValue(userState);
+    const tarefasFiltradas = useRecoilValue(filtroTarefas)
 
     //Busca dados da API ao montar o elemento
     useEffect(() => {
         fetch(`${URL_API}/tarefas`)
-        .then(response => response.json())
-        .then(dados => {
-            setListaTarefa(dados)
-            setCarregando(false)
-        })
-        .catch(error => console.error('Erro ao buscar dados da api ', error))
+            .then(response => response.json())
+            .then(dados => {
+                setListaTarefa(dados)
+                setCarregando(false)
+            })
+            .catch(error => console.error('Erro ao buscar dados da api ', error))
     }, [])
 
     //Função que cadastra novas tarefas
@@ -41,13 +42,13 @@ function ListaTarefa() {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({usuario: usuario.nome, texto: inputTarefa.valor, concluida: false})
+            body: JSON.stringify({ usuario: usuario.nome, texto: inputTarefa.valor, concluida: false })
         })
-        .then(response => response.json())
-        .then(dados => {setListaTarefa((prev) => [...prev, dados])})
-        .catch(error => console.error('Erro ao enviar os dados para a Api ', error))
-        .finally(() => {estaProcessando.current = false})
-        
+            .then(response => response.json())
+            .then(dados => { setListaTarefa((prev) => [...prev, dados]) })
+            .catch(error => console.error('Erro ao enviar os dados para a Api ', error))
+            .finally(() => { estaProcessando.current = false })
+
         inputTarefa.limpar();
     }
 
@@ -65,17 +66,17 @@ function ListaTarefa() {
                 "Content-Type": "application/json"
             }
         })
-        .then(() => {
-            setListaTarefa(prev => prev.filter(tarefa => tarefa._id !== id));
-        })
-        .catch(error => {console.error("Erro ao excluir a tarefa:", error)})
-        .finally(() => {estaProcessando.current = false})       
-    },[])
+            .then(() => {
+                setListaTarefa(prev => prev.filter(tarefa => tarefa._id !== id));
+            })
+            .catch(error => { console.error("Erro ao excluir a tarefa:", error) })
+            .finally(() => { estaProcessando.current = false })
+    }, [])
 
     //função que altera o valor concluida do objeto como true
     const alternarConcluida = useCallback((id, estadoAtual, texto) => {
 
-        if(estaProcessando.current) {
+        if (estaProcessando.current) {
             console.log('alternarConcluida já está processando')
             return
         }
@@ -84,26 +85,26 @@ function ListaTarefa() {
         fetch(`${URL_API}/tarefas/${id}`, {
             method: 'PUT',
             headers: {
-                'Content-Type': 'application/json' 
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify({usuario: usuario.nome ,texto, concluida: !estadoAtual})
+            body: JSON.stringify({ usuario: usuario.nome, texto, concluida: !estadoAtual })
         })
-        .then(() => 
-            setListaTarefa( prev =>
-                prev.map(tarefa => 
-                    tarefa._id === id
-                    ? {...tarefa, concluida: !estadoAtual}
-                    : tarefa
-                )))
-        .catch(error => console.error('erro ao alterar status da tarefa ', error)) 
-        .finally(() => {estaProcessando.current = false})
+            .then(() =>
+                setListaTarefa(prev =>
+                    prev.map(tarefa =>
+                        tarefa._id === id
+                            ? { ...tarefa, concluida: !estadoAtual }
+                            : tarefa
+                    )))
+            .catch(error => console.error('erro ao alterar status da tarefa ', error))
+            .finally(() => { estaProcessando.current = false })
     }, [])
 
-    return(
-        <> 
+    return (
+        <>
             <section className="form-de-tarefas">
                 <form onSubmit={handleSubmit}>
-                    <input onChange={inputTarefa.onChange} value={inputTarefa.valor} type="text" placeholder="Digite aqui a sua tarefa."/>
+                    <input onChange={inputTarefa.onChange} value={inputTarefa.valor} type="text" placeholder="Digite aqui a sua tarefa." />
                     <button type="submit">Enviar</button>
                 </form>
             </section>
@@ -122,26 +123,20 @@ function ListaTarefa() {
 
             <ul className="lista-de-tarefas">
                 {carregando ? (
-                   <p className="lista-de-tarefas__loading">Carregando...</p> 
+                    <p className="lista-de-tarefas__loading">Carregando...</p>
                 ) : (
-                    listaTarefa
-                    .filter(tarefa => tarefa.usuario === usuario.nome)
-                    .filter(dados => {
-                        if (filtro === 'todos') return true;
-                        if (filtro === 'concluido') return dados.concluida;
-                        if (filtro === 'pendente') return !dados.concluida;
-                        return true;
-                    })
-                    .map((dados) => {
-                        return (
-                            <Tarefa 
-                            texto = {dados.texto} 
-                            acaoBotao={() => {excluirTarefa(dados._id)}} key={dados._id}
-                            concluida={dados.concluida}
-                            alternar={() => alternarConcluida(dados._id, dados.concluida, dados.texto)}
-                            />
-                        )
-                    })
+                    tarefasFiltradas
+                        .map((dados) => {
+                            return (
+                                <Tarefa
+                                    texto={dados.texto}
+                                    acaoBotao={() => { excluirTarefa(dados._id) }}
+                                    key={dados._id}
+                                    concluida={dados.concluida}
+                                    alternar={() => alternarConcluida(dados._id, dados.concluida, dados.texto)}
+                                />
+                            )
+                        })
                 )}
             </ul>
         </>
